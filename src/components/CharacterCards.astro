@@ -1,0 +1,101 @@
+---
+const query = `
+  query {
+    characters {
+      results {
+        id
+        name
+        species
+        image
+        origin {
+          dimension
+        }
+      }
+    }
+  }
+`;
+
+let characters = [];
+
+try {
+  const response = await fetch('https://rickandmortyapi.com/graphql', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ query }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Network response was not ok');
+  }
+
+  const { data } = await response.json();
+  characters = data.characters.results;
+} catch (error) {
+  console.error('Fetch error:', error);
+}
+---
+
+<div class="container">
+  <div class="title">Rick and Morty</div>
+  <div class="cards">
+    {characters.map((character: { id: string; name: string; species: string; image: string; origin: { dimension: string } }) => (
+      <div class="card" data-key={character.id}>
+        <img src={character.image} alt={character.name} />
+        <h2>{character.name}</h2>
+        <p>{character.species}</p>
+        <p>{character.origin.dimension}</p>
+      </div>
+    ))}
+  </div>
+</div>
+
+<style>
+  @font-face {
+    font-family: 'RickAndMorty';
+    src: url('/src/assets/Ricky-and-Morty-font.ttf') format('truetype');
+  }
+
+  body {
+    background-color: black;
+    color: white;
+    margin: 0;
+    font-family: Arial, sans-serif;
+  }
+
+  .container {
+    text-align: center;
+    padding: 20px;
+  }
+
+  .title {
+    font-family: 'RickAndMorty', sans-serif;
+    color: #97FB9B;
+    font-size: 6em;
+    margin-bottom: 20px;
+  }
+
+  .cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: center;
+  }
+
+  .card {
+    border: 1px solid #99f9a6;
+    border-radius: 8px;
+    padding: 16px;
+    width: 200px;
+    text-align: center;
+    text-decoration: none;
+    color: inherit;
+    background-color: #1f1f1f;
+  }
+
+  .card img {
+    width: 100%;
+    border-radius: 8px;
+  }
+</style>
