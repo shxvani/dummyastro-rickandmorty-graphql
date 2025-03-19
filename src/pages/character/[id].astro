@@ -1,0 +1,189 @@
+---
+// filepath: /c:/Users/SESA755125/workspace/graphql-astro/src/pages/character/[id].astro
+export const prerender = false;
+
+import Layout from "../../layouts/Layout.astro";
+
+const characterId = Astro.params.id;
+
+const query = `
+  query($characterId: ID!) {
+    character(id: $characterId) {
+      name
+      created
+      image
+      gender
+      species
+      episode {
+        name
+        id
+        air_date
+      }
+    }
+  }
+`;
+
+let characterData = null;
+
+try {
+  const response = await fetch('https://rickandmortyapi.com/graphql', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ query, variables: { characterId } }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Network response was not ok');
+  }
+
+  const { data } = await response.json();
+  characterData = data.character;
+} catch (error) {
+  console.error('Fetch error:', error);
+}
+---
+
+<style>
+  @font-face {
+    font-family: 'RickyAndMorty';
+    src: url('/src/assets/Ricky-and-Morty-font.ttf') format('truetype');
+  }
+
+  body {
+    background-color: black;
+    color: #ffffff; /* Updated text color */
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+
+  h1, h2, h3 {
+    font-family: 'RickyAndMorty', sans-serif;
+    color: #97FB9B; /* Updated heading color */
+    margin: 30px 0; /* Added margin-top */
+  }
+
+  h1 {
+    font-size: 3rem;
+  }
+
+  h2 {
+    font-size: 2rem;
+  }
+
+  h3 {
+    font-size: 1.5rem;
+  }
+
+  .character-details {
+    text-align: center;
+    padding: 30px;
+    margin: 20px auto;
+    max-width: 800px;
+    border: 2px solid #97FB9B;
+    border-radius: 10px;
+    background-color: #121212;
+  }
+
+  .character-image {
+    max-width: 250px;
+    border: 3px solid #97FB9B;
+    border-radius: 10px;
+    margin: 20px auto;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+  }
+
+  li {
+    margin: 15px 0;
+    padding: 15px;
+    border: 1px solid #97FB9B;
+    border-radius: 5px;
+    background-color: #1a1a1a;
+  }
+
+  .episode-details {
+    margin-top: 30px;
+  }
+
+  p {
+    font-size: 1.2rem;
+    margin: 15px 0; /* Increased margin-top */
+  }
+
+  .go-back-button {
+    padding: 10px 20px;
+    font-size: 1.2rem;
+    color: #97FB9B;
+    background-color: #1a1a1a;
+    border: 2px solid #97FB9B;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+  }
+
+  .go-back-button:hover {
+    background-color: #97FB9B;
+    color: #1a1a1a;
+  }
+
+  .header-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* Align items to the left */
+    gap: 20px; /* Add spacing between the button and heading */
+    margin-bottom: 20px;
+  }
+
+  .episode-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 20px; /* Spacing between items */
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+  }
+
+  li {
+    padding: 15px;
+    border: 1px solid #97FB9B;
+    border-radius: 5px;
+    background-color: #1a1a1a;
+    text-align: center;
+  }
+</style>
+
+<Layout>
+  {characterData ? (
+    <div class="character-details">
+      <div class="header-container">
+        <button class="go-back-button" onclick="history.back()">
+          ⬅ Go Back
+        </button>
+        <h1>{characterData.name}</h1>
+      </div>
+      <img class="character-image" src={characterData.image} alt={characterData.name} />
+      <p>Gender: {characterData.gender}</p>
+      <p>Species: {characterData.species}</p>
+      <div class="episode-details">
+        <h2>Episodes:</h2>
+        <ul class="episode-grid">
+          {characterData.episode && characterData.episode.map((ep: { id: string; name: string; air_date: string }) => (
+            <li>
+              <h3>{ep.name}</h3>
+              <p>Air Date: {ep.air_date}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  ) : (
+    <p>Loading...</p>
+  )}
+</Layout>

@@ -41,12 +41,12 @@ try {
   <div class="title">Rick and Morty</div>
   <div class="cards">
     {characters.map((character: { id: string; name: string; species: string; image: string; origin: { dimension: string } }) => (
-      <div class="card" data-key={character.id}>
+      <a href={`/character/${character.id}`} class="card" data-key={character.id}>
         <img src={character.image} alt={character.name} />
         <h2>{character.name}</h2>
         <p>{character.species}</p>
         <p>{character.origin.dimension}</p>
-      </div>
+      </a>
     ))}
   </div>
 </div>
@@ -88,10 +88,15 @@ try {
     border-radius: 8px;
     padding: 16px;
     width: 200px;
+    
     text-align: center;
     text-decoration: none;
     color: inherit;
     background-color: #1f1f1f;
+  }
+  .card h2 {
+    font-family: 'RickAndMorty', sans-serif;
+    color: #97FB9B;
   }
 
   .card img {
